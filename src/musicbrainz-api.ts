@@ -45,6 +45,8 @@ export interface IMusicBrainzConfig {
   },
   baseUrl?: string,
 
+  setUserAgent?: boolean,
+
   appName?: string,
   appVersion?: string,
 
@@ -104,15 +106,19 @@ export class MusicBrainzApi {
 
     Object.assign(this.config, _config);
 
+    const ua = this.config.setUserAgent === false ? {} : {
+      /**
+       * https://musicbrainz.org/doc/XML_Web_Service/Rate_Limiting#Provide_meaningful_User-Agent_strings
+       */
+      'User-Agent': this.config.appName !== undefined && this.config.appVersion !== undefined && this.config.appContactInfo !== undefined
+        ? `${this.config.appName}/${this.config.appVersion} ( ${this.config.appContactInfo} )`
+        : ''
+    };
+
     this.axios = AxiosStatic.create({
       baseURL: this.config.baseUrl,
       timeout: 20 * 1000,
-      headers: {
-        /**
-         * https://musicbrainz.org/doc/XML_Web_Service/Rate_Limiting#Provide_meaningful_User-Agent_strings
-         */
-        'User-Agent': `${this.config.appName}/${this.config.appVersion} ( ${this.config.appContactInfo} )`
-      },
+      headers: { ...ua },
       httpsAgent: this.config.proxy ? new HttpsProxyAgent(this.config.proxy) : undefined
     });
 
@@ -120,7 +126,7 @@ export class MusicBrainzApi {
     //       however the two versions have inconsistent and incompatible exports for some reason, so it gets weird here.
     //       The former (noop) uses `module.exports = function`
     //       The latter uses `exports.default = function`
-    (typeof axiosCookieJarSupport === "function" ? axiosCookieJarSupport : axiosCookieJarSupport.default)(this.axios);
+    (typeof axiosCookieJarSupport === 'function' ? axiosCookieJarSupport : axiosCookieJarSupport.default)(this.axios);
     this.cookieJar = new CookieJar();
     this.axios.defaults.jar = this.cookieJar;
 
