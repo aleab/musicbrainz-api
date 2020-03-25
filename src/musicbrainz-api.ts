@@ -1,5 +1,5 @@
 import AxiosStatic, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
-import axiosCookieJarSupport from 'axios-cookiejar-support';
+import * as axiosCookieJarSupport from 'axios-cookiejar-support';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Cookie, CookieJar } from 'tough-cookie';
 
@@ -116,8 +116,12 @@ export class MusicBrainzApi {
       httpsAgent: this.config.proxy ? new HttpsProxyAgent(this.config.proxy) : undefined
     });
 
+    // NOTE: `axios-cookiejar-support` could IN THEORY be used both in the browser and in e.g. node, with the browser version being just a noop;
+    //       however the two versions have inconsistent and incompatible exports for some reason, so it gets weird here.
+    //       The former (noop) uses `module.exports = function`
+    //       The latter uses `exports.default = function`
+    (typeof axiosCookieJarSupport === "function" ? axiosCookieJarSupport : axiosCookieJarSupport.default)(this.axios);
     this.cookieJar = new CookieJar();
-    axiosCookieJarSupport(this.axios);
     this.axios.defaults.jar = this.cookieJar;
 
     this.rateLimiter = new RateLimiter(14, 14);
