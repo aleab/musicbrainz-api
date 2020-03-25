@@ -8,20 +8,7 @@
         "name": "Borewit",
         "url": "https://github.com/Borewit"
     },
-    "keywords": [
-        "MusicBrainz",
-        "metadata",
-        "meta",
-        "tag",
-        "tags",
-        "Picard",
-        "json",
-        "xml",
-        "web",
-        "service",
-        "submit",
-        "metabrainz"
-    ],
+    "keywords": [ "MusicBrainz", "metadata", "meta", "tag", "tags", "Picard", "json", "xml", "web", "service", "submit", "metabrainz" ],
     "license": "MIT",
     "private": false,
     "engines": {
@@ -74,6 +61,7 @@
         "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test-*.ts",
         "build": "npm run clean && npm run compile",
         "start": "npm-run-all compile lint cover-test",
+        "prepare": "npm run build",
         "test-coverage": "nyc npm run test",
         "send-coveralls": "nyc report --reporter=text-lcov | coveralls",
         "send-codacy": "nyc report --reporter=text-lcov | codacy-coverage"
