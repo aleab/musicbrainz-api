@@ -1,9 +1,10 @@
 {
-  "compilerOptions": {
-    "inlineSources": false,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "ES2017"
-  }
+    "compilerOptions": {
+        "inlineSources": false,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "ES2017",
+        "allowSyntheticDefaultImports": true
+    },
+    "exclude": ["node_modules", "lib"]
 }
-

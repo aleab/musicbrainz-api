@@ -1,3 +1,8 @@
+import AxiosStatic, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import axiosCookieJarSupport from 'axios-cookiejar-support';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { Cookie, CookieJar } from 'tough-cookie';
+
 import * as assert from 'assert';
 
 import * as HttpStatus from 'http-status-codes';
@@ -15,41 +20,17 @@ import {DigestAuth} from './digest-auth';
 import {RateLimiter} from './rate-limiter';
 import * as mb from './musicbrainz.types';
 
-import * as requestPromise from 'request-promise-native';
-import * as request from 'request';
-
 export * from './musicbrainz.types';
+
+const FormData = require('form-data');
 
 const retries = 3;
 
 /**
  * https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2#Subqueries
  */
-export type Includes =
-  'artists'
-  | 'releases'
-  | 'recordings'
-  | 'artists'
-  | 'artist-credits'
-  | 'isrcs'
-  | 'url-rels'
-  | 'release-groups'
-  | 'aliases'
-  | 'discids'
-  | 'annotation'
-  | 'media' // release-groups
-  | 'area-rels'
-  | 'artist-rels'
-  | 'event-rels'
-  | 'instrument-rels'
-  | 'label-rels'
-  | 'place-rels'
-  | 'recording-rels'
-  | 'release-rels'
-  | 'release-group-rels'
-  | 'series-rels'
-  | 'url-rels'
-  | 'work-rels';
+// tslint:disable-next-line:max-line-length
+export type Includes = 'artists' | 'releases' | 'recordings' | 'artists' | 'artist-credits' | 'isrcs' | 'url-rels' | 'release-groups' | 'aliases' | 'discids' | 'annotation' | 'media' /*release-groups*/ | 'area-rels' | 'artist-rels' | 'event-rels' | 'instrument-rels' | 'label-rels' | 'place-rels' | 'recording-rels' | 'release-rels' | 'release-group-rels' | 'series-rels' | 'url-rels' | 'work-rels';
 
 const debug = Debug('musicbrainz-api');
 
@@ -115,19 +96,16 @@ export class MusicBrainzApi {
     baseUrl: 'https://musicbrainz.org'
   };
 
-  private request: request.RequestAPI<requestPromise.RequestPromise, request.CoreOptions, request.RequiredUriUrl>;
-
+  private axios: AxiosInstance;
+  private cookieJar: CookieJar;
   private rateLimiter: RateLimiter;
-  private readonly cookieJar: request.CookieJar;
 
   public constructor(_config?: IMusicBrainzConfig) {
 
     Object.assign(this.config, _config);
 
-    this.cookieJar = request.jar();
-
-    this.request = requestPromise.defaults({
-      baseUrl: this.config.baseUrl,
+    this.axios = AxiosStatic.create({
+      baseURL: this.config.baseUrl,
       timeout: 20 * 1000,
       headers: {
         /**
@@ -135,11 +113,12 @@ export class MusicBrainzApi {
          */
         'User-Agent': `${this.config.appName}/${this.config.appVersion} ( ${this.config.appContactInfo} )`
       },
-      proxy: this.config.proxy,
-      strictSSL: false,
-      jar:  this.cookieJar,
-      resolveWithFullResponse: true
+      httpsAgent: this.config.proxy ? new HttpsProxyAgent(this.config.proxy) : undefined
     });
+
+    this.cookieJar = new CookieJar();
+    axiosCookieJarSupport(this.axios);
+    this.axios.defaults.jar = this.cookieJar;
 
     this.rateLimiter = new RateLimiter(14, 14);
   }
@@ -148,31 +127,30 @@ export class MusicBrainzApi {
 
     query.fmt = 'json';
 
-    let response: request.Response;
+    let response: AxiosResponse<T>;
 
     await this.rateLimiter.limit();
     do {
-      response = await this.request.get('/ws/2' + relUrl, {
-        qs: query,
-        json: true
-      }, null);
-      if (response.statusCode !== 503)
+      response =  await this.axios.get('/ws/2' + relUrl, {
+        params: query
+      });
+      if (response.status !== 503)
         break;
       debug('Rate limiter kicked in, slowing down...');
       await RateLimiter.sleep(500);
     } while (true);
 
-    switch (response.statusCode) {
+    switch (response.status) {
       case HttpStatus.OK:
-        return response.body;
+        return response.data;
 
       case HttpStatus.BAD_REQUEST:
       case HttpStatus.NOT_FOUND:
-        throw new Error(`Got response status ${response.statusCode}: ${HttpStatus.getStatusText(response.statusCode)}`);
+        throw new Error(`Got response status ${response.status}: ${HttpStatus.getStatusText(response.status)}`);
 
       case HttpStatus.SERVICE_UNAVAILABLE: // 503
       default:
-        const msg = `Got response status ${response.statusCode} on attempt #${attempt} (${HttpStatus.getStatusText(response.statusCode)})`;
+        const msg = `Got response status ${response.status} on attempt #${attempt} (${HttpStatus.getStatusText(response.status)})`;
         debug(msg);
         if (attempt < retries) {
           return this.restGet<T>(relUrl, query, attempt + 1);
@@ -279,24 +257,24 @@ export class MusicBrainzApi {
     do {
       try {
         await this.rateLimiter.limit();
-        await this.request.post(path, {
-          qs: {client: clientId},
-          headers: {
-            authorization: digest,
-            'Content-Type': 'application/xml'
+        await this.axios.post(path, postData, {
+          params: {
+            client: clientId
           },
-          body: postData
+          headers: {
+            Authorization: digest,
+            'Content-Type': 'application/xml'
+          }
         });
       } catch (err) {
-        const response = err.response;
-        assert.ok(response.complete);
-        if (response.statusCode === HttpStatus.UNAUTHORIZED) {
+        const response = (err as AxiosError).response;
+        if (response.status === HttpStatus.UNAUTHORIZED) {
           // Respond to digest challenge
           const auth = new DigestAuth(this.config.botAccount);
           const relPath = Url.parse(response.request.path).path; // Ensure path is relative
           digest = auth.digest(response.request.method, relPath, response.headers['www-authenticate']);
           continue;
-        } else if (response.statusCode === 503) {
+        } else if (response.status === 503) {
           continue;
         }
         break;
@@ -319,28 +297,27 @@ export class MusicBrainzApi {
     assert.ok(this.config.botAccount.username, 'bot username should be set');
     assert.ok(this.config.botAccount.password, 'bot password should be set');
 
-    let response: request.Response;
+    let response: AxiosResponse;
     try {
-      response = await this.request.post({
-        uri: '/login',
-        followRedirect: false, // Disable redirects,
-        qs: {
+      const formData = new FormData();
+      formData.append('username', this.config.botAccount.username);
+      formData.append('password', this.config.botAccount.password);
+
+      response = await this.axios.post('/login', null, {
+        maxRedirects: 0, // Disable redirects
+        params: {
           uri: redirectUri
         },
-        form: {
-          username: this.config.botAccount.username,
-          password: this.config.botAccount.password
-        }
+        data: formData
       });
     } catch (err) {
-      if (err.response) {
-        assert.ok(err.response.complete);
-        response = err.response;
+      if ((err as AxiosError).response) {
+        response = (err as AxiosError).response;
       } else {
         throw err;
       }
     }
-    assert.strictEqual(response.statusCode, HttpStatus.MOVED_TEMPORARILY, 'Expect redirect to /success');
+    assert.strictEqual(response.status, HttpStatus.MOVED_TEMPORARILY, 'Expect redirect to /success');
     return response.headers.location === redirectUri;
   }
 
@@ -356,18 +333,21 @@ export class MusicBrainzApi {
 
     await this.rateLimiter.limit();
 
-    let response: request.Response;
+    let response: AxiosResponse;
     try {
-      response = await this.request.post({
-        uri: `/${entity}/${mbid}/edit`,
-        form: formData,
-        followRedirect: false
+      const _formData = new FormData();
+      Object.getOwnPropertyNames(formData).forEach(k => {
+        _formData.append(k, formData[k].toString());
+      });
+
+      response = await this.axios.post(`/${entity}/${mbid}/edit`, null, {
+        data: _formData,
+        maxRedirects: 0
       });
     } catch (err) {
-      assert.ok(err.response.complete);
-      response = err.response;
+      response = (err as AxiosError).response;
     }
-    assert.strictEqual(response.statusCode, HttpStatus.MOVED_TEMPORARILY);
+    assert.strictEqual(response.status, HttpStatus.MOVED_TEMPORARILY);
   }
 
   /**
@@ -481,8 +461,8 @@ export class MusicBrainzApi {
     return this.search<mb.IUrlList>('url', query, offset, limit);
   }
 
-  private getCookies(url: string): request.Cookie[] {
-    return this.cookieJar.getCookies(url);
+  private getCookies(url: string): Cookie[] {
+    return this.cookieJar.getCookiesSync(url);
   }
 }
 

@@ -5,6 +5,8 @@ import * as mb from '../src/musicbrainz.types';
 
 const packageInfo = require('../package.json');
 
+require('dotenv').config({ path: './.env.test' });
+
 const appUrl = 'https://github.com/Borewit/musicbrainz-api';
 
 const testBotAccount = {

@@ -15,4 +15,5 @@ priv
 .travis.yml
 tslint.json
 lib/**/*.map
-package-lock.json
+
+.env.test

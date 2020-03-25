@@ -1,98 +1,98 @@
 {
-  "name": "musicbrainz-api",
-  "version": "0.5.2",
-  "description": "MusicBrainz API client for reading and submitting metadata",
-  "main": "lib/musicbrainz-api",
-  "types": "lib/musicbrainz-api",
-  "author": {
-    "name": "Borewit",
-    "url": "https://github.com/Borewit"
-  },
-  "keywords": [
-    "MusicBrainz",
-    "metadata",
-    "meta",
-    "tag",
-    "tags",
-    "Picard",
-    "json",
-    "xml",
-    "web",
-    "service",
-    "submit",
-    "metabrainz"
-  ],
-  "license": "MIT",
-  "private": false,
-  "devDependencies": {
-    "@types/chai": "^4.2.5",
-    "@types/mocha": "^7.0.1",
-    "@types/node": "^13.1.0",
-    "chai": "^4.2.0",
-    "coveralls": "^3.0.9",
-    "del-cli": "^3.0.0",
-    "mocha": "^7.0.0",
-    "nyc": "^15.0.0",
-    "remark-cli": "^7.0.1",
-    "remark-preset-lint-recommended": "^3.0.3",
-    "ts-node": "^8.5.4",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.2"
-  },
-  "engines": {
-    "node": "*"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Borewit/musicbrainz-api.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Borewit/musicbrainz-api/issues"
-  },
-  "dependencies": {
-    "@types/caseless": "^0.12.1",
-    "@types/request-promise-native": "^1.0.17",
-    "@types/uuid": "^3.4.6",
-    "caseless": "^0.12.0",
-    "debug": "^4.1.1",
-    "http-status-codes": "^1.4.0",
-    "json-stringify-safe": "^5.0.1",
-    "jsontoxml": "^1.0.1",
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.8",
-    "source-map-support": "^0.5.16",
-    "uuid": "^3.3.2"
-  },
-  "scripts": {
-    "clean": "del-cli lib/** src/**/*.js src/**/*.js.map src/**/*.d.ts test/**/*.js test/**/*.js.map",
-    "compile-src": "tsc -p src",
-    "compile-test": "tsc -p test",
-    "compile": "npm run compile-src && npm run compile-test",
-    "lint-ts": "tslint 'src/**/*.ts' --exclude 'src/**/*.d.ts' 'test/**/*.ts' --exclude 'test/**/*.d.ts'",
-    "lint-md": "remark -u preset-lint-recommended .",
-    "lint": "npm run lint-md && npm run lint-ts",
-    "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test-*.ts",
-    "build": "npm run clean && npm run compile",
-    "start": "npm-run-all compile lint cover-test",
-    "test-coverage": "nyc npm run test",
-    "send-coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "send-codacy": "nyc report --reporter=text-lcov | codacy-coverage"
-  },
-  "nyc": {
-    "exclude": [
-      "lib/**",
-      "test/**/*.ts",
-      "src/**/*.js"
+    "name": "musicbrainz-api",
+    "version": "0.5.2",
+    "description": "MusicBrainz API client for reading and submitting metadata",
+    "main": "lib/musicbrainz-api",
+    "types": "lib/musicbrainz-api",
+    "author": {
+        "name": "Borewit",
+        "url": "https://github.com/Borewit"
+    },
+    "keywords": [
+        "MusicBrainz",
+        "metadata",
+        "meta",
+        "tag",
+        "tags",
+        "Picard",
+        "json",
+        "xml",
+        "web",
+        "service",
+        "submit",
+        "metabrainz"
     ],
-    "extension": [
-      ".ts"
-    ],
-    "sourceMap": true,
-    "instrument": true,
-    "reporter": [
-      "lcov",
-      "text"
-    ],
-    "report-dir": "coverage"
-  }
+    "license": "MIT",
+    "private": false,
+    "engines": {
+        "node": "*"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Borewit/musicbrainz-api.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Borewit/musicbrainz-api/issues"
+    },
+    "dependencies": {
+        "axios": "^0.19.2",
+        "axios-cookiejar-support": "^0.5.1",
+        "debug": "^4.1.1",
+        "form-data": "^3.0.0",
+        "http-status-codes": "^1.4.0",
+        "https-proxy-agent": "^5.0.0",
+        "jsontoxml": "^1.0.1",
+        "tough-cookie": "^4.0.0",
+        "uuid": "^3.3.2"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.2.5",
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.9.3",
+        "@types/tough-cookie": "^2.3.6",
+        "@types/uuid": "^3.4.6",
+        "chai": "^4.2.0",
+        "coveralls": "^3.0.9",
+        "del-cli": "^3.0.0",
+        "dotenv": "^8.2.0",
+        "mocha": "^7.0.0",
+        "nyc": "^15.0.0",
+        "remark-cli": "^7.0.1",
+        "remark-preset-lint-recommended": "^3.0.3",
+        "ts-node": "^8.5.4",
+        "tslint": "^6.1.0",
+        "typescript": "^3.7.2"
+    },
+    "scripts": {
+        "clean": "del-cli lib/** src/**/*.js src/**/*.js.map src/**/*.d.ts test/**/*.js test/**/*.js.map",
+        "compile-src": "tsc -p src",
+        "compile-test": "tsc -p test",
+        "compile": "npm run compile-src && npm run compile-test",
+        "lint-ts": "tslint 'src/**/*.ts' --exclude 'src/**/*.d.ts' 'test/**/*.ts' --exclude 'test/**/*.d.ts'",
+        "lint-md": "remark -u preset-lint-recommended .",
+        "lint": "npm run lint-md && npm run lint-ts",
+        "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test-*.ts",
+        "build": "npm run clean && npm run compile",
+        "start": "npm-run-all compile lint cover-test",
+        "test-coverage": "nyc npm run test",
+        "send-coveralls": "nyc report --reporter=text-lcov | coveralls",
+        "send-codacy": "nyc report --reporter=text-lcov | codacy-coverage"
+    },
+    "nyc": {
+        "exclude": [
+            "lib/**",
+            "test/**/*.ts",
+            "src/**/*.js"
+        ],
+        "extension": [
+            ".ts"
+        ],
+        "sourceMap": true,
+        "instrument": true,
+        "reporter": [
+            "lcov",
+            "text"
+        ],
+        "report-dir": "coverage"
+    }
 }
