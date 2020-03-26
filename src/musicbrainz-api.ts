@@ -463,6 +463,10 @@ export class MusicBrainzApi {
     return this.search<mb.IReleaseGroupList>('release-group', query, offset, limit);
   }
 
+  public searchRecording(query: string | IFormData, offset?: number, limit?: number): Promise<mb.IRecordingList> {
+    return this.search<mb.IRecordingList>('recording', query, offset, limit);
+  }
+
   public searchArea(query: string | IFormData, offset?: number, limit?: number): Promise<mb.IAreaList> {
     return this.search<mb.IAreaList>('area', query, offset, limit);
   }

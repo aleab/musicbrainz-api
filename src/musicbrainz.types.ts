@@ -151,6 +151,9 @@ export interface IReleaseGroupMatch extends IReleaseGroup, IMatch {
 export interface IReleaseMatch extends IRelease, IMatch {
 }
 
+export interface IRecordingMatch extends IRecording, IMatch {
+}
+
 export interface IAreaMatch extends IArea, IMatch {
 }
 
@@ -174,6 +177,10 @@ export interface IReleaseList extends ISearchResult {
 
 export interface IReleaseGroupList extends ISearchResult {
   'release-groups': IReleaseGroupMatch[]
+}
+
+export interface IRecordingList extends ISearchResult {
+  recordings: IRecordingMatch[]
 }
 
 export interface IUrlList extends ISearchResult {
