@@ -17,13 +17,13 @@ export interface IArea {
 export interface IAlias {
   name: string,
   'sort-name': string,
-  ended: boolean,
+  ended?: boolean,
   'type-id': string,
   type: string,
-  locale: string,
-  primary: string,
-  begin: string,
-  end: string
+  locale?: string,
+  primary?: string,
+  begin?: string,
+  end?: string
 }
 
 export interface IMatch {
@@ -33,7 +33,7 @@ export interface IMatch {
 export interface IArtist {
   id: string;
   name: string;
-  disambiguation: string;
+  disambiguation?: string;
   'sort-name': string;
   'type-id'?: string;
   'gender-id'?;
@@ -56,7 +56,7 @@ export interface IArtist {
 
 export interface IArtistCredit {
   artist: IArtist;
-  joinphrase: string;
+  joinphrase?: string;
   name: string;
 }
 
@@ -65,8 +65,8 @@ export type ReleaseQuality = 'normal';  // ToDo
 export interface IRelease {
   id: string;
   title: string;
-  'text-representation': { 'language': string, 'script': string },
-  disambiguation: string;
+  'text-representation'?: { 'language': string, 'script': string },
+  disambiguation?: string;
   asin: string,
   'status-id': string;
   packaging?: string;
@@ -77,8 +77,8 @@ export interface IRelease {
   media: IMedium[];
   'cover-art-archive': ICoverArtArchive;
   country: string;
-  quality: string; // type ReleaseQuality doesnt work here
-  barcode: string;
+  quality?: string; // type ReleaseQuality doesnt work here
+  barcode?: string;
   relations?: IRelation[];
   'artist-credit'?: IArtistCredit[]; // Include 'artist-credits '
   'release-group'?: IReleaseGroup; // Include: 'release-groups'
@@ -93,12 +93,12 @@ export type MediaFormatType = 'Digital Media'; // ToDo
 
 export interface IRecording {
   id: string;
-  video: boolean;
+  video?: boolean;
   length: number;
   title: string;
-  disambiguation: string;
+  disambiguation?: string;
   isrcs?: string[];
-  releases?: IRelease;
+  releases?: IRelease[];
   relations?: IRelation[];
   'artist-credit'?: IArtistCredit[];
   aliases?: IAlias[];
