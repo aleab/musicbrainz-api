@@ -1,5 +1,6 @@
 import * as uuid from 'uuid/v4';
-import * as crypto from 'crypto';
+
+const md5: (s: string) => string = require('./md5');
 
 interface IChallenge {
   algorithm?: string;
@@ -12,10 +13,6 @@ interface IChallenge {
 export interface ICredentials {
   username: string;
   password: string;
-}
-
-function md5(str) {
-  return crypto.createHash('md5').update(str).digest('hex'); // lgtm [js/insufficient-password-hash]
 }
 
 export class DigestAuth {

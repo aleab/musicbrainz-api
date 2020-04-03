@@ -7,7 +7,6 @@ import * as assert from 'assert';
 
 import * as HttpStatus from 'http-status-codes';
 import * as Url from 'url';
-import * as Debug from 'debug';
 
 export {XmlMetadata} from './xml/xml-metadata';
 export {XmlIsrc} from './xml/xml-isrc';
@@ -31,8 +30,6 @@ const retries = 3;
  */
 // tslint:disable-next-line:max-line-length
 export type Includes = 'artists' | 'releases' | 'recordings' | 'artists' | 'artist-credits' | 'isrcs' | 'url-rels' | 'release-groups' | 'aliases' | 'discids' | 'annotation' | 'media' /*release-groups*/ | 'area-rels' | 'artist-rels' | 'event-rels' | 'instrument-rels' | 'label-rels' | 'place-rels' | 'recording-rels' | 'release-rels' | 'release-group-rels' | 'series-rels' | 'url-rels' | 'work-rels';
-
-const debug = Debug('musicbrainz-api');
 
 export interface IFormData {
   [key: string]: string | number;
@@ -146,7 +143,6 @@ export class MusicBrainzApi {
       });
       if (response.status !== 503)
         break;
-      debug('Rate limiter kicked in, slowing down...');
       await RateLimiter.sleep(500);
     } while (true);
 
@@ -161,7 +157,7 @@ export class MusicBrainzApi {
       case HttpStatus.SERVICE_UNAVAILABLE: // 503
       default:
         const msg = `Got response status ${response.status} on attempt #${attempt} (${HttpStatus.getStatusText(response.status)})`;
-        debug(msg);
+        console.debug('[musicbrainz-api]', msg);
         if (attempt < retries) {
           return this.restGet<T>(relUrl, query, attempt + 1);
         } else

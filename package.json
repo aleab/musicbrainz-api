@@ -8,7 +8,20 @@
         "name": "Borewit",
         "url": "https://github.com/Borewit"
     },
-    "keywords": [ "MusicBrainz", "metadata", "meta", "tag", "tags", "Picard", "json", "xml", "web", "service", "submit", "metabrainz" ],
+    "keywords": [
+        "MusicBrainz",
+        "metadata",
+        "meta",
+        "tag",
+        "tags",
+        "Picard",
+        "json",
+        "xml",
+        "web",
+        "service",
+        "submit",
+        "metabrainz"
+    ],
     "license": "MIT",
     "private": false,
     "engines": {
@@ -21,14 +34,18 @@
     "bugs": {
         "url": "https://github.com/Borewit/musicbrainz-api/issues"
     },
+    "browser": {
+        "./lib/md5": "md5",
+        "tough-cookie": "./lib/browser/tough-cookie.js"
+    },
     "dependencies": {
         "axios": "^0.19.2",
         "axios-cookiejar-support": "^0.5.1",
-        "debug": "^4.1.1",
         "form-data": "^3.0.0",
         "http-status-codes": "^1.4.0",
         "https-proxy-agent": "^5.0.0",
         "jsontoxml": "^1.0.1",
+        "md5": "^2.2.1",
         "tough-cookie": "^4.0.0",
         "uuid": "^3.3.2"
     },

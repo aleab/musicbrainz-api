@@ -1,7 +1,3 @@
-import * as Debug from 'debug';
-
-const debug = Debug('musicbrainz-api:rate-limiter');
-
 export class RateLimiter {
 
   public static sleep(ms): Promise<void> {
@@ -23,7 +19,6 @@ export class RateLimiter {
     }
     if (this.queue.length >= this.maxCalls) {
       const delay = this.queue[0] + this.period - now;
-      debug(`Client side rate limiter activated: cool down for ${delay / 1000} s...`);
       return RateLimiter.sleep(delay);
     }
     now = new Date().getTime();
